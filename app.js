@@ -14,9 +14,9 @@
    ============================================================ */
 
 /* ---------- Config ---------- */
-// Point this at your LangGraph/FastAPI endpoint when it's ready.
-// e.g. "http://localhost:8000/chat"
-const CHAT_API_URL = null;
+// The Stage-1 LangGraph/FastAPI backend (raw Bedrock model, no RAG).
+// Set back to null to restore the offline placeholder reply.
+const CHAT_API_URL = "http://localhost:8000/chat";
 
 /* ---------- Product data ----------
    These fields double as the source content for the Bedrock

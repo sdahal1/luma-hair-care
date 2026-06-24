@@ -1,0 +1,11 @@
+# Python virtual environment
+.venv/
+
+# Local environment / secrets
+.env
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Pinned lockfile is fine to commit; this ignores nothing else by default.
