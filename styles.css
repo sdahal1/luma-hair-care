@@ -422,6 +422,66 @@ a { color: inherit; text-decoration: none; }
 .msg-typing span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
 
+/* Tool-call visibility note (not a chat bubble) */
+.msg-tool {
+  align-self: flex-start;
+  max-width: 90%;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--ink-soft);
+  background: transparent;
+  padding: 0.1rem 0.3rem;
+  opacity: 0.9;
+  animation: msg-in 0.25s ease;
+}
+
+/* Refund approval panel (human-in-the-loop) */
+.approval-panel {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+.approval-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+.approval-details {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0 0 0.5rem;
+}
+.approval-details > div { display: flex; gap: 0.5rem; }
+.approval-details dt {
+  flex: 0 0 70px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.approval-details dd { margin: 0; }
+.approval-items {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.7rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+.approval-items li { display: flex; justify-content: space-between; gap: 0.5rem; }
+.approval-qty { color: var(--ink-soft); }
+.approval-note {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  margin: 0 0 0.6rem;
+}
+.approval-actions { display: flex; gap: 0.5rem; }
+.approval-actions .btn {
+  flex: 1;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+}
+
 /* Suggestions */
 .chat-suggestions {
   display: flex; flex-wrap: wrap; gap: 0.45rem;

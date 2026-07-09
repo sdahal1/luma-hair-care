@@ -1,0 +1,45 @@
+{
+  "orders": {
+    "LUMA-1001": {
+      "customer_name": "Jordan Lee",
+      "email": "jordan@example.com",
+      "items": [
+        { "product": "Weekly Repair Mask", "qty": 1, "price": 30 }
+      ],
+      "status": "delivered",
+      "refund_status": null,
+      "purchased": "2026-06-20"
+    },
+    "LUMA-1002": {
+      "customer_name": "Priya Shah",
+      "email": "priya@example.com",
+      "items": [
+        { "product": "Repair Bond Oil", "qty": 2, "price": 32 }
+      ],
+      "status": "delivered",
+      "refund_status": null,
+      "purchased": "2025-03-15"
+    },
+    "LUMA-1003": {
+      "customer_name": "Alex Rivera",
+      "email": "alex@example.com",
+      "items": [
+        { "product": "Hydra Wash Shampoo", "qty": 1, "price": 22 },
+        { "product": "Silk Slip Conditioner", "qty": 1, "price": 24 }
+      ],
+      "status": "delivered",
+      "refund_status": "refunded",
+      "purchased": "2025-06-20"
+    }
+  },
+  "inventory": {
+    "weekly-repair-mask": 12,
+    "repair-bond-oil": 0,
+    "hydra-wash-shampoo": 25,
+    "silk-slip-conditioner": 18,
+    "heat-shield-mist": 7,
+    "define-curl-cream": 15,
+    "air-dry-styling-gel": 9,
+    "scalp-reset-serum": 4
+  }
+}

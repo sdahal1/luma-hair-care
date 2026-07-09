@@ -1,0 +1,135 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Unit tests for the store": [
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493921538
+      },
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493977675
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790747272
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790762647
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790831923
+      }
+    ],
+    "2.1 Unit tests for tools": [
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493921578
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790747312
+      }
+    ],
+    "3. Extend graph state and add classifier + general nodes": [
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493921607
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790747383
+      }
+    ],
+    "4.1 Unit tests for routing functions": [
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493921645
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790747411
+      }
+    ],
+    "5. Human-in-the-loop refund nodes": [
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493921693
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790747443
+      }
+    ],
+    "6.1 Integration test for the HITL flow": [
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493921720
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790747469
+      }
+    ],
+    "7. Backend API: SSE streaming + resume endpoint": [
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493921745
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790747501
+      }
+    ],
+    "8. Frontend: SSE event handling + approval panel (vanilla JS)": [
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493921771
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790747529
+      }
+    ],
+    "9. End-to-end verification and cleanup": [
+      {
+        "executionId": "c1eac540-8258-4694-835e-e8eb4fd75bca",
+        "chatSessionId": "sess_b2add14a-a7bf-4f02-8b2c-0dadef04e533",
+        "timestamp": 1782493921796
+      },
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790747561
+      }
+    ],
+    "1. Mock data layer (orders + store module)": [
+      {
+        "executionId": "961aa74e-f941-4938-a1dc-b357520c21d8",
+        "chatSessionId": "sess_0f9fa176-a6c0-4d35-a176-0a2da629335e",
+        "timestamp": 1782790831967
+      }
+    ]
+  }
+}

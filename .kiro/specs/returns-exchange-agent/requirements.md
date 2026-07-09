@@ -53,7 +53,7 @@ must keep working unchanged.
 
 ### Requirement 1: Preserve existing product Q&A
 
-**User story:** As a shopper, I want to keep asking product, ingredient, routine,
+**User Story:** As a shopper, I want to keep asking product, ingredient, routine,
 and policy questions and get grounded answers, so that the new features don't
 regress what already works.
 
@@ -66,7 +66,7 @@ regress what already works.
 
 ### Requirement 2: Intent-based routing
 
-**User story:** As a support operator, I want each message routed to a focused
+**User Story:** As a support operator, I want each message routed to a focused
 specialist branch, so that the bot's behavior is reliable and easy to reason about.
 
 #### Acceptance Criteria
@@ -80,7 +80,7 @@ specialist branch, so that the bot's behavior is reliable and easy to reason abo
 
 ### Requirement 3: Order lookup and identity from order number
 
-**User story:** As a customer starting a return, I want to identify my purchase by
+**User Story:** As a customer starting a return, I want to identify my purchase by
 order number, so that the bot can see my order without me logging in.
 
 #### Acceptance Criteria
@@ -93,7 +93,7 @@ order number, so that the bot can see my order without me logging in.
 
 ### Requirement 4: Multi-step refund processing
 
-**User story:** As a customer, I want to request a refund and have the bot work
+**User Story:** As a customer, I want to request a refund and have the bot work
 through the necessary checks, so that the request is handled end-to-end.
 
 #### Acceptance Criteria
@@ -111,7 +111,7 @@ through the necessary checks, so that the request is handled end-to-end.
 
 ### Requirement 5: Human-in-the-loop refund approval
 
-**User story:** As a store manager, I want to approve or deny refunds before money
+**User Story:** As a store manager, I want to approve or deny refunds before money
 moves, so that the bot can't autonomously issue an invalid or expensive refund.
 
 #### Acceptance Criteria
@@ -126,7 +126,7 @@ moves, so that the bot can't autonomously issue an invalid or expensive refund.
 
 ### Requirement 6: Mock data layer (no database)
 
-**User story:** As the developer, I want order/refund data mocked in a local file,
+**User Story:** As the developer, I want order/refund data mocked in a local file,
 so that I can demo the agent without provisioning a database.
 
 #### Acceptance Criteria
@@ -140,7 +140,7 @@ so that I can demo the agent without provisioning a database.
 
 ### Requirement 7: Backend API support for pause/resume
 
-**User story:** As the frontend, I need an API that can carry a paused approval back
+**User Story:** As the frontend, I need an API that can carry a paused approval back
 and forth, so that the HITL refund works over HTTP.
 
 #### Acceptance Criteria
@@ -153,7 +153,7 @@ and forth, so that the HITL refund works over HTTP.
 
 ### Requirement 8: Manager approval UI
 
-**User story:** As a store manager using the demo, I want a simple way to see and
+**User Story:** As a store manager using the demo, I want a simple way to see and
 act on a pending refund, so that the HITL step is visible end-to-end.
 
 #### Acceptance Criteria

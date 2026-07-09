@@ -17,6 +17,10 @@
 // The Stage-1 LangGraph/FastAPI backend (raw Bedrock model, no RAG).
 // Set back to null to restore the offline placeholder reply.
 const CHAT_API_URL = "http://localhost:8000/chat";
+// Resume a paused human-in-the-loop refund: a manager's approve/deny decision
+// is POSTed here with the conversation's thread_id, then the graph continues
+// streaming the post-decision reply over the same SSE contract.
+const RESUME_API_URL = "http://localhost:8000/resume";
 
 /* ---------- Product data ----------
    These fields double as the source content for the Bedrock
@@ -383,6 +387,15 @@ const Chat = {
     return el;
   },
 
+  addToolNote(label) {
+    const el = document.createElement("div");
+    el.className = "msg-tool";
+    el.textContent = "🔧 " + label;
+    this.messages.appendChild(el);
+    this.scrollToBottom();
+    return el;
+  },
+
   showTyping() {
     const el = document.createElement("div");
     el.className = "msg msg-bot msg-typing";
@@ -395,23 +408,148 @@ const Chat = {
   async send(text) {
     this.input.value = "";
     this.addUser(text);
-    const typing = this.showTyping();
+    let typing = this.showTyping();
     let botEl = null;
+    let interrupted = false;
 
-    const onToken = (token) => {
-      if (!botEl) { typing.remove(); botEl = this.addBot(""); }
-      botEl.textContent += token;
-      this.scrollToBottom();
+    const clearTyping = () => { if (typing && typing.isConnected) typing.remove(); typing = null; };
+    const ensureBot = () => { if (!botEl) { clearTyping(); botEl = this.addBot(""); } return botEl; };
+
+    const callbacks = {
+      onTool: (info) => {
+        clearTyping();
+        this.addToolNote(info && info.label ? info.label : "Working…");
+        botEl = null;                 // next text starts a fresh bubble after the tool note
+        typing = this.showTyping();   // keep a working indicator going
+      },
+      onToken: (token) => { ensureBot().textContent += token; this.scrollToBottom(); },
+      onInterrupt: (payload) => {
+        interrupted = true;
+        clearTyping();
+        this.renderApprovalPanel(payload);
+      },
+      onError: (message) => {
+        clearTyping();
+        if (botEl) botEl.remove();
+        this.addBot(message || "Sorry, I hit a snag. Please try again in a moment.");
+      },
     };
 
     try {
-      const full = await sendToBackend(text, onToken);
-      if (!botEl) { typing.remove(); this.addBot(full); }
-      else if (full && botEl.textContent !== full) { botEl.textContent = full; }
+      const full = await sendToBackend(text, callbacks);
+      clearTyping();
+      if (!botEl && !interrupted && full) this.addBot(full);
     } catch (err) {
-      typing.remove();
+      clearTyping();
       if (botEl) botEl.remove();
       this.addBot("Sorry, I'm having trouble connecting right now. Please try again in a moment.");
+      console.error(err);
+    }
+  },
+
+  /* ---------- Human-in-the-loop refund approval ----------
+     When the backend pauses on an interrupt, it sends an approval payload.
+     We render an inline panel with the refund details and Approve / Deny
+     buttons. Acting on either POSTs the decision to /resume and streams the
+     continuation into a fresh bot bubble. */
+  renderApprovalPanel(payload) {
+    const panel = document.createElement("div");
+    panel.className = "msg msg-bot approval-panel";
+
+    const amount = (typeof payload.amount === "number")
+      ? `$${payload.amount.toFixed(2)}`
+      : `$${payload.amount ?? ""}`;
+    const items = Array.isArray(payload.items) ? payload.items : [];
+    const itemsHtml = items.length
+      ? items.map((it) =>
+          `<li>${escapeHtml(it.product)} <span class="approval-qty">× ${escapeHtml(it.qty)}</span></li>`
+        ).join("")
+      : "<li>(no items listed)</li>";
+
+    panel.innerHTML = `
+      <div class="approval-title">Refund approval needed</div>
+      <dl class="approval-details">
+        <div><dt>Order</dt><dd>${escapeHtml(payload.order_number || "")}</dd></div>
+        <div><dt>Customer</dt><dd>${escapeHtml(payload.customer || "")}</dd></div>
+        <div><dt>Amount</dt><dd>${escapeHtml(amount)}</dd></div>
+        <div><dt>Reason</dt><dd>${escapeHtml(payload.reason || "")}</dd></div>
+      </dl>
+      <ul class="approval-items">${itemsHtml}</ul>
+      <p class="approval-note">Awaiting manager approval…</p>
+      <div class="approval-actions">
+        <button class="btn btn-primary approval-approve" type="button">Approve</button>
+        <button class="btn btn-ghost approval-deny" type="button">Deny</button>
+      </div>`;
+
+    this.messages.appendChild(panel);
+    this.scrollToBottom();
+
+    const actions = panel.querySelector(".approval-actions");
+    const note = panel.querySelector(".approval-note");
+
+    // Resolve the panel: remove the buttons (no double-submit), update the
+    // pending note to reflect the decision, then resume the graph.
+    const decide = (approved) => {
+      actions.remove();
+      note.textContent = approved
+        ? "Approved — processing the refund…"
+        : "Denied — letting the customer know…";
+      this.resumeRefund(approved);
+    };
+
+    panel.querySelector(".approval-approve").addEventListener("click", () => decide(true));
+    panel.querySelector(".approval-deny").addEventListener("click", () => decide(false));
+    return panel;
+  },
+
+  async resumeRefund(approved) {
+    let typing = this.showTyping();
+    let botEl = null;
+    let interrupted = false;
+
+    const clearTyping = () => { if (typing && typing.isConnected) typing.remove(); typing = null; };
+    const ensureBot = () => { if (!botEl) { clearTyping(); botEl = this.addBot(""); } return botEl; };
+
+    const callbacks = {
+      onTool: (info) => {
+        clearTyping();
+        this.addToolNote(info && info.label ? info.label : "Working…");
+        botEl = null;
+        typing = this.showTyping();
+      },
+      onToken: (token) => { ensureBot().textContent += token; this.scrollToBottom(); },
+      onInterrupt: (payload) => {
+        interrupted = true;
+        clearTyping();
+        this.renderApprovalPanel(payload);
+      },
+      onError: (message) => {
+        clearTyping();
+        if (botEl) botEl.remove();
+        this.addBot(message || "Sorry, something went wrong resuming the refund.");
+      },
+    };
+
+    try {
+      const res = await fetch(RESUME_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          thread_id: getThreadId(),
+          approved: approved,
+          reviewer: "manager-demo",
+        }),
+      });
+      if (!res.ok) throw new Error(`Resume error: ${res.status}`);
+
+      const contentType = res.headers.get("content-type") || "";
+      const full = await readStream(res, contentType, callbacks);
+      clearTyping();
+      if (!botEl && !interrupted && full) this.addBot(full);
+    } catch (err) {
+      clearTyping();
+      if (botEl) botEl.remove();
+      this.addBot("Sorry, I couldn't submit that decision. Please try again.");
       console.error(err);
     }
   },
@@ -435,10 +573,18 @@ function getThreadId() {
 
 /* ---------- Backend bridge ----------
    Sends { message, thread_id } and streams the reply back token by
-   token via onToken(). Handles SSE ("data:" frames) and raw text
-   streams; falls back to a single JSON { reply }. Until
-   CHAT_API_URL is set, a simulated stream keeps the UX visible. */
-async function sendToBackend(text, onToken) {
+   token. `callbacks` is an object of optional handlers:
+     - onToken(text):      a streamed text fragment to append
+     - onInterrupt(payload): a refund paused for manager approval
+     - onError(message):   the backend reported an error event
+   For convenience a bare function is accepted and treated as onToken.
+   Handles SSE (typed `event:` frames) and raw text streams; falls back
+   to a single JSON { reply }. Until CHAT_API_URL is set, a simulated
+   stream keeps the UX visible. */
+async function sendToBackend(text, callbacks) {
+  if (typeof callbacks === "function") callbacks = { onToken: callbacks };
+  callbacks = callbacks || {};
+  const onToken = callbacks.onToken;
   const threadId = getThreadId();
 
   if (!CHAT_API_URL) {
@@ -462,7 +608,7 @@ async function sendToBackend(text, onToken) {
     contentType.includes("application/x-ndjson") ||
     contentType.includes("text/plain")
   );
-  if (isStream) return readStream(res, contentType, onToken);
+  if (isStream) return readStream(res, contentType, callbacks);
 
   const data = await res.json();
   const reply = data.reply ?? data.message ?? "(no response)";
@@ -470,7 +616,17 @@ async function sendToBackend(text, onToken) {
   return reply;
 }
 
-async function readStream(res, contentType, onToken) {
+/* Read a streamed response, dispatching on the SSE `event:` type.
+   The backend emits typed frames:
+     event: token     data: <text fragment>
+     event: interrupt  data: <JSON approval payload>
+     event: done       data: [DONE]
+     event: error      data: <message>
+   `callbacks` may provide onToken / onInterrupt / onError. A non-SSE
+   (raw text) response keeps the legacy behavior: every chunk is a token. */
+async function readStream(res, contentType, callbacks) {
+  callbacks = callbacks || {};
+  const { onToken, onInterrupt, onError, onTool } = callbacks;
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   const isSSE = contentType.includes("text/event-stream");
@@ -483,22 +639,51 @@ async function readStream(res, contentType, onToken) {
     const chunk = decoder.decode(value, { stream: true });
 
     if (!isSSE) {
+      // Raw-text stream fallback: every chunk is reply text.
       full += chunk;
       if (onToken) onToken(chunk);
       continue;
     }
 
-    // Server-Sent Events: parse "data:" lines, split on blank lines.
+    // Server-Sent Events: split on blank lines, then read the `event:` and
+    // `data:` lines within each frame to decide how to handle it.
     buffer += chunk;
     const frames = buffer.split("\n\n");
     buffer = frames.pop() || "";
     for (const frame of frames) {
+      if (!frame.trim()) continue;
+      let eventType = "message";
+      const dataLines = [];
       for (const line of frame.split("\n")) {
-        if (!line.startsWith("data:")) continue;
-        const payload = line.slice(5).trim();
-        if (payload === "[DONE]") continue;
-        full += payload;
-        if (onToken) onToken(payload);
+        if (line.startsWith("event:")) eventType = line.slice(6).trim();
+        else if (line.startsWith("data:")) {
+          let d = line.slice(5);
+          if (d.startsWith(" ")) d = d.slice(1);  // strip only the single SSE separator space
+          dataLines.push(d);
+        }
+      }
+      const data = dataLines.join("\n");
+
+      if (eventType === "interrupt") {
+        let payload = null;
+        try { payload = JSON.parse(data); }
+        catch (e) { console.error("Bad interrupt payload:", e, data); }
+        if (payload && onInterrupt) onInterrupt(payload);
+      } else if (eventType === "error") {
+        if (onError) onError(data);
+        else throw new Error(data || "Stream error");
+      } else if (eventType === "tool") {
+        let info = null;
+        try { info = JSON.parse(data); } catch (e) { info = { label: data }; }
+        if (onTool) onTool(info);
+      } else if (eventType === "done") {
+        // End of this turn; nothing to append.
+        continue;
+      } else {
+        // token (or an untyped frame for the raw-text fallback path).
+        if (data === "[DONE]") continue;
+        full += data;
+        if (onToken) onToken(data);
       }
     }
   }
@@ -513,6 +698,18 @@ async function simulateStream(text, onToken) {
     onToken((i === 0 ? "" : " ") + words[i]);
     await new Promise((r) => setTimeout(r, 28));
   }
+}
+
+// Escape user/order-derived text before injecting into innerHTML so the
+// approval panel can't be used to inject markup.
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c]));
 }
 
 /* ---------- Boot ---------- */
