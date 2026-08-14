@@ -381,7 +381,7 @@ const Chat = {
   addBot(text) {
     const el = document.createElement("div");
     el.className = "msg msg-bot";
-    el.textContent = text;
+    setRichText(el, text || "");
     this.messages.appendChild(el);
     this.scrollToBottom();
     return el;
@@ -422,7 +422,11 @@ const Chat = {
         botEl = null;                 // next text starts a fresh bubble after the tool note
         typing = this.showTyping();   // keep a working indicator going
       },
-      onToken: (token) => { ensureBot().textContent += token; this.scrollToBottom(); },
+      onToken: (token) => {
+        const el = ensureBot();
+        setRichText(el, (el.dataset.raw || "") + token);
+        this.scrollToBottom();
+      },
       onInterrupt: (payload) => {
         interrupted = true;
         clearTyping();
@@ -517,7 +521,11 @@ const Chat = {
         botEl = null;
         typing = this.showTyping();
       },
-      onToken: (token) => { ensureBot().textContent += token; this.scrollToBottom(); },
+      onToken: (token) => {
+        const el = ensureBot();
+        setRichText(el, (el.dataset.raw || "") + token);
+        this.scrollToBottom();
+      },
       onInterrupt: (payload) => {
         interrupted = true;
         clearTyping();
@@ -710,6 +718,74 @@ function escapeHtml(value) {
     '"': "&quot;",
     "'": "&#39;",
   }[c]));
+}
+
+/* ---------- Lightweight markdown for bot replies ----------
+   The model answers in markdown (**bold**, `-` bullets, numbered steps).
+   Appending that with textContent shows the raw syntax, so we render a
+   small, safe subset instead: bold, italic, inline code, bullet and
+   numbered lists, and paragraphs.
+
+   Safety: the text is HTML-escaped FIRST, then only our own tags are
+   introduced. Model output is never treated as markup, so a reply
+   containing <script> or an onerror= attribute stays inert text. */
+function renderInline(escaped) {
+  return escaped
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[\s(])\*([^*\n]+)\*(?=$|[\s).,!?;:])/g, "$1<em>$2</em>");
+}
+
+function renderRichText(raw) {
+  const lines = escapeHtml(raw).split("\n");
+  const out = [];
+  let list = null;          // { tag: "ul"|"ol", items: [] }
+  let para = [];            // buffered plain lines
+
+  const flushPara = () => {
+    if (para.length) { out.push("<p>" + renderInline(para.join("<br>")) + "</p>"); para = []; }
+  };
+  const flushList = () => {
+    if (list) {
+      out.push("<" + list.tag + ">" +
+        list.items.map((i) => "<li>" + renderInline(i) + "</li>").join("") +
+        "</" + list.tag + ">");
+      list = null;
+    }
+  };
+
+  for (const line of lines) {
+    const bullet = line.match(/^\s*[-*•]\s+(.*)$/);
+    const numbered = line.match(/^\s*\d+[.)]\s+(.*)$/);
+    const heading = line.match(/^\s*#{1,6}\s+(.*)$/);
+    if (heading) {
+      flushPara();
+      flushList();
+      out.push('<p class="msg-heading">' + renderInline(heading[1]) + "</p>");
+    } else if (bullet || numbered) {
+      flushPara();
+      const tag = bullet ? "ul" : "ol";
+      if (!list || list.tag !== tag) { flushList(); list = { tag, items: [] }; }
+      list.items.push((bullet ? bullet[1] : numbered[1]));
+    } else if (!line.trim()) {
+      flushPara();
+      flushList();
+    } else {
+      flushList();
+      para.push(line);
+    }
+  }
+  flushPara();
+  flushList();
+  return out.join("");
+}
+
+/* Set a bubble's text, keeping the raw markdown on the node so streamed
+   tokens can be re-rendered as the reply grows (a token may land in the
+   middle of a `**bold**` span, so we always re-render the whole reply). */
+function setRichText(el, raw) {
+  el.dataset.raw = raw;
+  el.innerHTML = renderRichText(raw);
 }
 
 /* ---------- Boot ---------- */

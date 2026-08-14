@@ -403,6 +403,49 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--line);
   border-bottom-left-radius: 5px;
 }
+
+/* Rendered markdown inside a bot reply. The bubble sets the line-height and
+   font-size; these rules only manage spacing between blocks so a multi-part
+   answer (intro + bullet list + closing line) reads as separate thoughts
+   instead of one dense paragraph. */
+.msg-bot p {
+  margin: 0 0 0.55rem;
+}
+.msg-bot > :last-child {
+  margin-bottom: 0;
+}
+.msg-bot .msg-heading {
+  font-weight: 650;
+  margin: 0.15rem 0 0.4rem;
+}
+.msg-bot .msg-heading strong {
+  font-weight: inherit;
+}
+.msg-bot strong {
+  font-weight: 650;
+  color: var(--text, inherit);
+}
+.msg-bot em {
+  font-style: italic;
+}
+.msg-bot code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.06);
+}
+.msg-bot ul,
+.msg-bot ol {
+  margin: 0 0 0.55rem;
+  padding-left: 1.25rem;
+}
+.msg-bot li {
+  margin: 0.2rem 0;
+}
+.msg-bot li::marker {
+  color: var(--primary);
+}
 .msg-user {
   align-self: flex-end;
   background: var(--primary);
